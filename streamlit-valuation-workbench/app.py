@@ -141,16 +141,19 @@ if mode == "Public company":
         debt = (balance.get("totalDebt", 0) or 0) / 1_000_000
         equity_value = enterprise_value + cash - debt
         st.markdown('<div class="section-heading" style="margin-top:1.2rem">3. Valuation summary</div>', unsafe_allow_html=True)
-        m1, m2, m3, m4 = st.columns(4)
+        m1, m2, m3 = st.columns(3)
         m1.metric("Enterprise value", f"${enterprise_value:,.0f}m")
         m2.metric("Equity value", f"${equity_value:,.0f}m")
-        m3.metric("EV / Year 1 EBITDA", f"{enterprise_value / rows[0]['EBITDA']:.1f}×")
-        m4.metric("Terminal value / EV", f"{pv_terminal / enterprise_value:.1%}")
+        m3.metric("EV / Year 1 Revenue", f"{enterprise_value / rows[0]['Revenue']:.1f}×")
+        m4, m5, m6 = st.columns(3)
+        m4.metric("EV / Year 1 EBITDA", f"{enterprise_value / rows[0]['EBITDA']:.1f}×")
+        m5.metric("EV / Year 1 EBIT", f"{enterprise_value / rows[0]['EBIT']:.1f}×")
+        m6.metric("Terminal value / EV", f"{pv_terminal / enterprise_value:.1%}")
         st.markdown('<div class="section-heading" style="margin-top:1.2rem">Free cash flow forecast</div>', unsafe_allow_html=True)
         st.dataframe(rows, use_container_width=True, hide_index=True, column_config={key: st.column_config.NumberColumn(format="$%.1f") for key in rows[0] if key != "Year"})
 else:
     st.title("Private Company DCF")
     st.caption("Enter your diligence inputs directly. This workflow does not use a market-data API.")
     model_html = Path(__file__).with_name("valuation-workbench.html").read_text(encoding="utf-8")
-    private_only_html = model_html.replace("<body>", "<body><style>[data-mode=public]{display:none!important}.choices{grid-template-columns:1fr!important}</style>")
+    private_only_html = model_html.replace("<body>", "<body><style>[data-mode=public],#home,#switch{display:none!important}.choices{grid-template-columns:1fr!important}</style>")
     components.html(private_only_html, height=1320, scrolling=True)
