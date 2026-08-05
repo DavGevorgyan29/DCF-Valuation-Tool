@@ -7,7 +7,7 @@ import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 load_dotenv()
-st.set_page_config(page_title="Valuation Workbench", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Valuation Workbench", page_icon="📈", layout="wide", initial_sidebar_state="collapsed")
 
 
 def api_key():
@@ -19,8 +19,6 @@ def workbench_style():
         """
         <style>
         .block-container {max-width:1180px; padding-top:1.4rem; padding-bottom:3rem;}
-        [data-testid="stSidebar"] {background:#f4f7fb; border-right:1px solid #dce4ef;}
-        [data-testid="stSidebar"] [data-testid="stRadio"] label {font-size:1rem; color:#17253c;}
         .workbench-header {background:#10284e; color:#fff; border-radius:12px 12px 0 0; padding:25px 30px; margin-bottom:0;}
         .workbench-header h1 {margin:0; font-size:1.75rem; letter-spacing:-.04em; color:#fff;}
         .workbench-header p {margin:5px 0 0; color:#c6d8f3; font-size:1rem;}
@@ -34,6 +32,8 @@ def workbench_style():
         [data-testid="stMetricLabel"] {color:#66758c; font-size:.78rem;}
         [data-testid="stMetricValue"] {color:#17253c; font-size:1.35rem;}
         [data-testid="stDataFrame"] {border:1px solid #dce4ef; border-radius:10px; overflow:hidden;}
+        [data-testid="stSegmentedControl"] {margin:0 0 1.2rem;}
+        [data-testid="stSegmentedControl"] button {border-radius:7px; font-weight:600;}
         </style>
         """,
         unsafe_allow_html=True,
@@ -74,20 +74,31 @@ def dcf(revenue, margin, tax_rate, da_rate, capex_rate, nwc_rate, growth, fade, 
     return rows, present_value + pv_terminal_value, pv_terminal_value
 
 
-mode = st.sidebar.radio("Company type", ["Public company", "Private company"], index=0)
+workbench_style()
+st.markdown(
+    """
+    <div class="workbench-header">
+      <h1>Valuation Workbench</h1>
+      <p>DCF valuations for public and private companies.</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+mode = st.segmented_control(
+    "Company type",
+    ["Public company", "Private company"],
+    selection_mode="single",
+    default="Public company",
+    label_visibility="collapsed",
+)
 
 if mode == "Public company":
-    workbench_style()
     st.markdown(
         """
-        <div class="workbench-header">
-          <h1>Valuation Workbench</h1>
-          <p>DCF valuations for public and private companies.</p>
-        </div>
         <div class="workbench-body">
           <div class="eyebrow">Public company model</div>
           <div class="section-heading">Start a public-company valuation</div>
-          <p class="section-copy">Enter a ticker to import reported financials. Your API key remains secure on the server.</p>
+          <p class="section-copy">Enter a ticker to import reported financials.</p>
         </div>
         """,
         unsafe_allow_html=True,
